@@ -1,3 +1,13 @@
+<!-- fork-notice:start -->
+
+> **About this fork:** maintained copy of [mugnavo/cove](https://github.com/mugnavo/cove), used for learning and integration. All credit for the original work goes to its authors. License: Unlicense (see `LICENSE`).
+>
+> **Live demo (upstream):** <https://cove.mugnavo.com>
+>
+> [![Standard CI](https://github.com/ArAryan1314/cove/actions/workflows/standard-ci.yml/badge.svg)](https://github.com/ArAryan1314/cove/actions/workflows/standard-ci.yml)
+
+<!-- fork-notice:end -->
+
 # [Cove Stack](https://github.com/mugnavo/cove)
 
 <!-- scaffold:description -->

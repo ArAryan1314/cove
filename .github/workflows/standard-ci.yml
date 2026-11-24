@@ -1,0 +1,70 @@
+name: Standard CI
+
+on:
+  push:
+  pull_request:
+  workflow_dispatch:
+
+permissions:
+  contents: read
+
+concurrency:
+  group: ci-${{ github.ref }}
+  cancel-in-progress: true
+
+env:
+  CI: true
+  SKIP_ENV_VALIDATION: 1
+  NEXT_TELEMETRY_DISABLED: 1
+
+jobs:
+  node-root:
+    name: Node (.)
+    runs-on: ubuntu-latest
+    timeout-minutes: 20
+    services:
+      postgres:
+        image: postgres:17
+        env:
+          POSTGRES_USER: postgres
+          POSTGRES_PASSWORD: password
+          POSTGRES_DB: cove
+        ports:
+          - 5432:5432
+        options: >-
+          --health-cmd pg_isready --health-interval 5s --health-timeout 5s --health-retries 10
+    env:
+      BETTER_AUTH_SECRET: ci-placeholder-not-a-real-secret-0123456789
+      DATABASE_URL: postgresql://postgres:password@localhost:5432/cove
+      DIRECT_URL: postgresql://postgres:password@localhost:5432/cove
+      POSTGRES_PRISMA_URL: postgresql://postgres:password@localhost:5432/cove
+      POSTGRES_URL_NON_POOLING: postgresql://postgres:password@localhost:5432/cove
+      POSTGRES_URL: postgresql://postgres:password@localhost:5432/cove
+    defaults:
+      run:
+        working-directory: .
+    steps:
+      - uses: actions/checkout@v5
+      - uses: pnpm/action-setup@v4
+      - uses: actions/setup-node@v5
+        with:
+          node-version: 22
+          package-manager-cache: false
+      - name: Install
+        run: pnpm install --no-frozen-lockfile
+      - name: Install test browser (Playwright Chromium)
+        run: pnpm exec playwright install --with-deps chromium
+      - name: Lint
+        run: pnpm run lint
+      - name: Format check (report only)
+        continue-on-error: true
+        run: pnpm run format:check
+      - name: Type-check
+        run: pnpm run check
+      - name: Build
+        run: pnpm run build
+      - name: Test
+        run: pnpm run test
+      - name: Dependency audit (report only)
+        continue-on-error: true
+        run: pnpm audit --audit-level high
